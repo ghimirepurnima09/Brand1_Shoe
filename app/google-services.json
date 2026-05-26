@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "508922566114",
+    "firebase_url": "https://brandshoe-5d10c-default-rtdb.firebaseio.com",
+    "project_id": "brandshoe-5d10c",
+    "storage_bucket": "brandshoe-5d10c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:508922566114:android:a060b4ceb8d8308f2615bb",
+        "android_client_info": {
+          "package_name": "com.example.brand_shoe"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3dfP8J--H54G1geg9u3dzTC5XZbJYk8w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:508922566114:android:fd58d3e5706682662615bb",
+        "android_client_info": {
+          "package_name": "com.example.c38"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC3dfP8J--H54G1geg9u3dzTC5XZbJYk8w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
