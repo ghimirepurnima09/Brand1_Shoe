@@ -12,24 +12,14 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Brand_Shoe">
         <activity
-            android:name=".OrderConfirmationActivity"
+            android:name=".AdminProfileActivity"
             android:exported="false"
-            android:label="@string/title_activity_order_confirmation"
+            android:label="@string/title_activity_admin_profile"
             android:theme="@style/Theme.Brand_Shoe" />
         <activity
-            android:name=".CartActivity"
+            android:name=".UserProfileActivity"
             android:exported="false"
-            android:label="@string/title_activity_cart"
-            android:theme="@style/Theme.Brand_Shoe" />
-        <activity
-            android:name=".CartActivity.kt"
-            android:exported="false"
-            android:label="@string/title_activity_cart_activity.kt"
-            android:theme="@style/Theme.Brand_Shoe" />
-        <activity
-            android:name=".AdminLoginActivity.kt"
-            android:exported="false"
-            android:label="@string/title_activity_admin_login_activity.kt"
+            android:label="@string/title_activity_user_profile"
             android:theme="@style/Theme.Brand_Shoe" />
         <activity
             android:name=".SplashScreenActivity"
@@ -61,6 +51,12 @@
             android:exported="false" />
         <activity
             android:name=".ProductDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CartActivity"
+            android:exported="false" />
+        <activity
+            android:name=".OrderConfirmationActivity"
             android:exported="false" />
         <activity
             android:name=".AdminDashboardActivity"

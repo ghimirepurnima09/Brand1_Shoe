@@ -16,7 +16,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExitToApp
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
@@ -36,7 +38,6 @@ import com.example.brand_shoe.Model.ProductModel
 import com.example.brand_shoe.ViewModel.ProductViewModel
 import com.example.brand_shoe.ViewModel.ProductViewModelFactory
 import com.example.brand_shoe.repo.ProductRepoImpl
-import com.example.brand_shoe.repo.UserRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
 
 class HomePageActivity : ComponentActivity() {
@@ -46,12 +47,6 @@ class HomePageActivity : ComponentActivity() {
         setContent {
             Brand_ShoeTheme {
                 HomeDashboard(
-                    onLogout = {
-                        CartManager.clearCart()
-                        UserRepoImpl().logout { _, _ -> }
-                        startActivity(Intent(this, LoginActivity::class.java))
-                        finish()
-                    },
                     onProductClick = { product ->
                         val intent = Intent(this, ProductDetailActivity::class.java)
                         intent.putExtra("productId", product.id)
@@ -61,7 +56,8 @@ class HomePageActivity : ComponentActivity() {
                         intent.putExtra("productImageKey", product.imageKey)
                         startActivity(intent)
                     },
-                    onCartClick = { startActivity(Intent(this, CartActivity::class.java)) }
+                    onCartClick = { startActivity(Intent(this, CartActivity::class.java)) },
+                    onProfileClick = { startActivity(Intent(this, UserProfileActivity::class.java)) }
                 )
             }
         }
@@ -70,7 +66,7 @@ class HomePageActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeDashboard(onLogout: () -> Unit, onProductClick: (ProductModel) -> Unit, onCartClick: () -> Unit) {
+fun HomeDashboard(onProductClick: (ProductModel) -> Unit, onCartClick: () -> Unit, onProfileClick: () -> Unit) {
     val viewModel: ProductViewModel = viewModel(factory = ProductViewModelFactory(ProductRepoImpl()))
     var products by remember { mutableStateOf<List<ProductModel?>>(emptyList()) }
 
@@ -86,7 +82,7 @@ fun HomeDashboard(onLogout: () -> Unit, onProductClick: (ProductModel) -> Unit, 
                         Image(
                             painter = painterResource(id = R.drawable.logo),
                             contentDescription = null,
-                            modifier = Modifier.size(32.dp).clip(CircleShape).border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                            modifier = Modifier.size(30.dp).clip(CircleShape).border(1.dp, MaterialTheme.colorScheme.primary, CircleShape),
                             contentScale = ContentScale.Crop
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -94,45 +90,83 @@ fun HomeDashboard(onLogout: () -> Unit, onProductClick: (ProductModel) -> Unit, 
                     }
                 },
                 actions = {
-                    IconButton(onClick = onCartClick) {
-                        BadgedBox(badge = {
-                            if (CartManager.cartCount > 0) {
-                                Badge { Text("${CartManager.cartCount}") }
-                            }
-                        }) {
-                            Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
-                        }
-                    }
-                    IconButton(onClick = onLogout) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
+                    IconButton(onClick = { }) {
+                        Icon(Icons.Default.Notifications, contentDescription = "Notifications")
                     }
                 }
             )
+        },
+        bottomBar = {
+            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
+                NavigationBarItem(
+                    selected = true,
+                    onClick = {},
+                    icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                    label = { Text("Home") },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.primary,
+                        selectedTextColor = MaterialTheme.colorScheme.primary,
+                        indicatorColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onCartClick,
+                    icon = {
+                        BadgedBox(badge = {
+                            if (CartManager.cartCount > 0) Badge { Text("${CartManager.cartCount}") }
+                        }) {
+                            Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
+                        }
+                    },
+                    label = { Text("Cart") }
+                )
+                NavigationBarItem(
+                    selected = false,
+                    onClick = onProfileClick,
+                    icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+                    label = { Text("Profile") }
+                )
+            }
         }
     ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding).fillMaxSize().padding(horizontal = 16.dp)) {
+        Column(modifier = Modifier.padding(innerPadding).fillMaxSize().padding(horizontal = 20.dp)) {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                "Step into your\nnext favorite pair",
+                style = MaterialTheme.typography.headlineSmall,
+                lineHeight = 30.sp
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
             OutlinedTextField(
                 value = "",
                 onValueChange = {},
                 placeholder = { Text("Search shoes...") },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                shape = CircleShape,
-                colors = TextFieldDefaults.colors(
-                    unfocusedContainerColor = Color(0xFFF5F5F5),
-                    focusedContainerColor = Color(0xFFF5F5F5),
+                shape = RoundedCornerShape(18.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = MaterialTheme.colorScheme.primary
                 )
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("New Arrivals", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
+            Spacer(modifier = Modifier.height(28.dp))
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text("New Arrivals", style = MaterialTheme.typography.headlineSmall)
+                Text("${products.size} items", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+
             Spacer(modifier = Modifier.height(16.dp))
 
             if (products.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No products yet — check back soon!", color = Color.Gray)
+                    Text("No products yet — check back soon!", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             } else {
                 LazyVerticalGrid(
@@ -154,26 +188,35 @@ fun HomeDashboard(onLogout: () -> Unit, onProductClick: (ProductModel) -> Unit, 
 @Composable
 fun ProductGridItem(product: ProductModel, onClick: () -> Unit) {
     Card(
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
     ) {
-        Column(modifier = Modifier.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(modifier = Modifier.padding(12.dp)) {
             Box(
-                modifier = Modifier.fillMaxWidth().height(140.dp).clip(RoundedCornerShape(20.dp)).background(Color(0xFFF1F1F1)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(130.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
                 contentAlignment = Alignment.Center
             ) {
                 Image(
                     painter = painterResource(id = imageKeyToDrawable(product.imageKey)),
                     contentDescription = product.name,
-                    modifier = Modifier.size(110.dp),
+                    modifier = Modifier.size(104.dp),
                     contentScale = ContentScale.Fit
                 )
             }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(product.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, maxLines = 1)
-            Text("$${"%.2f".format(product.price)}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(product.name, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                "$${"%.2f".format(product.price)}",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
@@ -181,5 +224,5 @@ fun ProductGridItem(product: ProductModel, onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun HomeDashboardPreview() {
-    Brand_ShoeTheme { HomeDashboard(onLogout = {}, onProductClick = {}, onCartClick = {}) }
+    Brand_ShoeTheme { HomeDashboard(onProductClick = {}, onCartClick = {}, onProfileClick = {}) }
 }

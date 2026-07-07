@@ -8,10 +8,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -20,6 +22,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -63,7 +67,6 @@ class ProductDetailActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailScreen(
     productId: String,
@@ -89,86 +92,113 @@ fun ProductDetailScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Product Details") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back") }
-                }
-            )
-        }
-    ) { innerPadding ->
-        Column(modifier = Modifier.padding(innerPadding).fillMaxSize().verticalScroll(rememberScrollState())) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
             Box(
-                modifier = Modifier.fillMaxWidth().height(280.dp).background(Color(0xFFF1F1F1)),
-                contentAlignment = Alignment.Center
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(320.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            0f to MaterialTheme.colorScheme.primaryContainer,
+                            1f to MaterialTheme.colorScheme.surfaceVariant
+                        )
+                    )
             ) {
+                IconButton(
+                    onClick = onBackClick,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .background(Color.White.copy(alpha = 0.9f), CircleShape)
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                }
                 Image(
                     painter = painterResource(id = imageKeyToDrawable(productImageKey)),
                     contentDescription = productName,
-                    modifier = Modifier.size(220.dp),
+                    modifier = Modifier.align(Alignment.Center).size(230.dp),
                     contentScale = ContentScale.Fit
                 )
             }
 
-            Column(modifier = Modifier.padding(20.dp)) {
-                Text(productName, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("$${"%.2f".format(productPrice)}", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.primary)
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Description", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                    .background(MaterialTheme.colorScheme.background)
+                    .offset(y = (-24).dp)
+                    .padding(24.dp)
+            ) {
+                Text(productName, style = MaterialTheme.typography.headlineSmall)
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    "$${"%.2f".format(productPrice)}",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(20.dp))
+                Text("Description", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                     productDescription.ifBlank { "No description provided for this product." },
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(28.dp))
+                Spacer(modifier = Modifier.height(120.dp))
+            }
+        }
 
-                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    OutlinedButton(
-                        onClick = {
-                            CartManager.addToCart(productId, productName, productPrice, productImageKey)
-                            onAddToCart()
-                        },
-                        modifier = Modifier.weight(1f).height(52.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text("Add to Cart", fontWeight = FontWeight.Bold)
-                    }
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            OutlinedButton(
+                onClick = {
+                    CartManager.addToCart(productId, productName, productPrice, productImageKey)
+                    onAddToCart()
+                },
+                modifier = Modifier.weight(1f).height(54.dp),
+                shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary),
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text("Add to Cart", fontWeight = FontWeight.Bold)
+            }
 
-                    Button(
-                        onClick = {
-                            if (isPlacingOrder) return@Button
-                            isPlacingOrder = true
-                            val user = FirebaseAuth.getInstance().currentUser
-                            val order = OrderModel(
-                                userId = user?.uid ?: "",
-                                userName = user?.email ?: "",
-                                productId = productId,
-                                productName = productName,
-                                price = productPrice,
-                                quantity = 1,
-                                status = "Pending"
-                            )
-                            viewModel.placeOrder(order) { success, message ->
-                                isPlacingOrder = false
-                                if (success) {
-                                    showOrderNotification(context, "Your order is confirmed successfully")
-                                    onOrderPlaced()
-                                } else {
-                                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        },
-                        enabled = !isPlacingOrder,
-                        modifier = Modifier.weight(1f).height(52.dp),
-                        shape = RoundedCornerShape(16.dp)
-                    ) {
-                        Text(if (isPlacingOrder) "PLACING..." else "Buy Now", fontWeight = FontWeight.Bold)
+            Button(
+                onClick = {
+                    if (isPlacingOrder) return@Button
+                    isPlacingOrder = true
+                    val user = FirebaseAuth.getInstance().currentUser
+                    val order = OrderModel(
+                        userId = user?.uid ?: "",
+                        userName = user?.email ?: "",
+                        productId = productId,
+                        productName = productName,
+                        price = productPrice,
+                        quantity = 1,
+                        status = "Pending"
+                    )
+                    viewModel.placeOrder(order) { success, message ->
+                        isPlacingOrder = false
+                        if (success) {
+                            showOrderNotification(context, "Your order is confirmed successfully")
+                            onOrderPlaced()
+                        } else {
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
                     }
-                }
+                },
+                enabled = !isPlacingOrder,
+                modifier = Modifier.weight(1f).height(54.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+            ) {
+                Text(if (isPlacingOrder) "PLACING..." else "Buy Now", fontWeight = FontWeight.Bold)
             }
         }
     }
