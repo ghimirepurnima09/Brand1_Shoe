@@ -5,49 +5,29 @@ import androidx.lifecycle.ViewModel
 import com.example.brand_shoe.Model.UserModel
 import com.example.brand_shoe.repo.UserRepo
 
-class UserViewModel(val repo: UserRepo): ViewModel() {
+class UserViewModel(val repo: UserRepo) : ViewModel() {
 
-    fun login(
-        email: String,
-        password: String,
-        callback: (Boolean, String) -> Unit
-    ) {
+    fun login(email: String, password: String, callback: (Boolean, String) -> Unit) {
         repo.login(email, password, callback)
     }
 
-    fun register(
-        email: String, password: String,
-        callback: (Boolean, String, String) -> Unit
-    ) {
+    fun register(email: String, password: String, callback: (Boolean, String, String) -> Unit) {
         repo.register(email, password, callback)
     }
 
-    fun editProfile(
-        id: String, model: UserModel,
-        callback: (Boolean, String) -> Unit
-    ) {
+    fun editProfile(id: String, model: UserModel, callback: (Boolean, String) -> Unit) {
         repo.editProfile(id, model, callback)
     }
 
-
-    fun addUser(
-        id: String, model: UserModel,
-        callback: (Boolean, String) -> Unit
-    ) {
+    fun addUser(id: String, model: UserModel, callback: (Boolean, String) -> Unit) {
         repo.addUser(id, model, callback)
     }
 
-    fun deleteUsr(
-        id: String,
-        callback: (Boolean, String) -> Unit
-    ) {
+    fun deleteUsr(id: String, callback: (Boolean, String) -> Unit) {
         repo.deleteUsr(id, callback)
     }
 
-    fun forgetPassword(
-        email: String,
-        callback: (Boolean, String) -> Unit
-    ) {
+    fun forgetPassword(email: String, callback: (Boolean, String) -> Unit) {
         repo.forgetPassword(email, callback)
     }
 
@@ -57,38 +37,24 @@ class UserViewModel(val repo: UserRepo): ViewModel() {
     private val _users = MutableLiveData<UserModel?>()
     val users: MutableLiveData<UserModel?> get() = _users
 
-
-    fun getUserId(
-        id: String
-    ) {
+    fun getUserId(id: String) {
         _loading.value = true
-        repo.getUserId(id) { success, msg, data ->
-            if (success) {
-                _users.value = data
-                _loading.value = false
-            } else {
-                _users.value = null
-                _loading.value = false
-            }
+        repo.getUserId(id) { success, _, data ->
+            _loading.value = false
+            _users.value = if (success) data else null
         }
     }
 
     private val _allUsers = MutableLiveData<List<UserModel?>>()
     val allUsers: MutableLiveData<List<UserModel?>> get() = _allUsers
 
-
     fun getAllUser() {
-        repo.getAllUser { success, message, data ->
-            if (success) {
-                _loading.value = false
-                _allUsers.value = data
-            } else {
-                _loading.value = false
-                _allUsers.value = emptyList()
-            }
+        _loading.value = true
+        repo.getAllUser { success, _, data ->
+            _loading.value = false
+            _allUsers.value = if (success) data else emptyList()
         }
     }
-
 
     fun logout(callback: (Boolean, String) -> Unit) {
         repo.logout(callback)

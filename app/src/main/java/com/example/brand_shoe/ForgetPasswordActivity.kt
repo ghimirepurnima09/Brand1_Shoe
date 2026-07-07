@@ -24,6 +24,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.brand_shoe.ViewModel.UserViewModel
+import com.example.brand_shoe.ViewModel.UserViewModelFactory
+import com.example.brand_shoe.repo.UserRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
 
 class ForgetPasswordActivity : ComponentActivity() {
@@ -43,7 +47,9 @@ class ForgetPasswordActivity : ComponentActivity() {
 @Composable
 fun ForgetPasswordContent(onBackClick: () -> Unit) {
     var email by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val viewModel: UserViewModel = viewModel(factory = UserViewModelFactory(UserRepoImpl()))
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(
@@ -54,7 +60,6 @@ fun ForgetPasswordContent(onBackClick: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Beautiful Circular Logo
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo",
@@ -64,23 +69,23 @@ fun ForgetPasswordContent(onBackClick: () -> Unit) {
                     .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape),
                 contentScale = ContentScale.Crop
             )
-            
+
             Spacer(modifier = Modifier.height(32.dp))
-            
+
             Text(
                 text = "Forgot Password",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold
             )
-            
+
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             Text(
-                text = "Enter your email to receive a reset code",
+                text = "Enter your email to receive a reset link",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
-            
+
             Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
@@ -92,26 +97,30 @@ fun ForgetPasswordContent(onBackClick: () -> Unit) {
                 singleLine = true,
                 shape = CircleShape
             )
-            
+
             Spacer(modifier = Modifier.height(32.dp))
-            
+
             Button(
                 onClick = {
-                    if (email.isNotEmpty()) {
-                        Toast.makeText(context, "Reset code sent to $email", Toast.LENGTH_LONG).show()
-                    } else {
+                    if (email.isBlank()) {
                         Toast.makeText(context, "Please enter your email", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    isLoading = true
+                    viewModel.forgetPassword(email.trim()) { _, message ->
+                        isLoading = false
+                        Toast.makeText(context, message, Toast.LENGTH_LONG).show()
                     }
                 },
+                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 shape = CircleShape
             ) {
-                Text("SEND CODE", fontWeight = FontWeight.Bold)
+                Text(if (isLoading) "SENDING..." else "SEND CODE", fontWeight = FontWeight.Bold)
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
-            // Changed "Back to Login" to "Back to Log In"
+
             TextButton(onClick = onBackClick) {
                 Text("Back to Log In", fontWeight = FontWeight.SemiBold)
             }

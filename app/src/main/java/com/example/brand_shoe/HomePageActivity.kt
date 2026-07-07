@@ -1,5 +1,6 @@
 package com.example.brand_shoe
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,9 +15,9 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.brand_shoe.repo.UserRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
 
 class HomePageActivity : ComponentActivity() {
@@ -37,7 +39,13 @@ class HomePageActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Brand_ShoeTheme {
-                HomeDashboard()
+                HomeDashboard(
+                    onLogout = {
+                        UserRepoImpl().logout { _, _ -> }
+                        startActivity(Intent(this, LoginActivity::class.java))
+                        finish()
+                    }
+                )
             }
         }
     }
@@ -100,7 +108,7 @@ fun ShoeGridItem(shoe: ShoeItem) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeDashboard() {
+fun HomeDashboard(onLogout: () -> Unit) {
     val shoes = listOf(
         ShoeItem(1, "Nike Air Max", "$120.00", R.drawable.shoe1),
         ShoeItem(2, "Adidas Ultra", "$180.00", R.drawable.shoe2),
@@ -113,7 +121,7 @@ fun HomeDashboard() {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { 
+                title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Image(
                             painter = painterResource(id = R.drawable.logo),
@@ -126,21 +134,19 @@ fun HomeDashboard() {
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            "BRAND SHOE", 
-                            fontWeight = FontWeight.ExtraBold, 
+                            "BRAND SHOE",
+                            fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 1.sp,
                             style = MaterialTheme.typography.titleLarge
-                        ) 
+                        )
                     }
                 },
                 actions = {
                     IconButton(onClick = { }) {
                         Icon(Icons.Default.Notifications, contentDescription = "Notifications")
                     }
-                },
-                navigationIcon = {
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
+                    IconButton(onClick = onLogout) {
+                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
                     }
                 }
             )
@@ -152,7 +158,6 @@ fun HomeDashboard() {
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
         ) {
-            // Search Bar
             OutlinedTextField(
                 value = "",
                 onValueChange = {},
@@ -197,6 +202,6 @@ fun HomeDashboard() {
 @Composable
 fun HomeDashboardPreview() {
     Brand_ShoeTheme {
-        HomeDashboard()
+        HomeDashboard(onLogout = {})
     }
 }

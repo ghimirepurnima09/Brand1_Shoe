@@ -8,17 +8,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -26,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
+import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
 
 @SuppressLint("CustomSplashScreen")
@@ -37,8 +38,12 @@ class SplashScreenActivity : ComponentActivity() {
             Brand_ShoeTheme {
                 SplashScreenContent(
                     onTimeout = {
-                        // Navigate to Log In after splash
-                        startActivity(Intent(this, LoginActivity::class.java))
+                        val target = if (FirebaseAuth.getInstance().currentUser != null) {
+                            HomePageActivity::class.java
+                        } else {
+                            Onboarding::class.java
+                        }
+                        startActivity(Intent(this, target))
                         finish()
                     }
                 )
@@ -50,51 +55,81 @@ class SplashScreenActivity : ComponentActivity() {
 @Composable
 fun SplashScreenContent(onTimeout: () -> Unit) {
     LaunchedEffect(Unit) {
-        delay(4000) // 4 seconds delay
+        delay(4000)
         onTimeout()
     }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.White),
-        contentAlignment = Alignment.Center
+            .background(Color.Black)
     ) {
+        Image(
+            painter = painterResource(id = R.drawable.shoe1),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
+            alpha = 0.6f
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.3f),
+                            Color.Transparent,
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.5f)
+                        )
+                    )
+                )
+        )
+
         Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // circular Logo - removed shoe images as requested
-            Image(
-                painter = painterResource(id = R.drawable.logo),
-                contentDescription = "Brand Shoe Logo",
-                modifier = Modifier
-                    .size(220.dp)
-                    .clip(CircleShape)
-                    .border(4.dp, MaterialTheme.colorScheme.primary, CircleShape),
-                contentScale = ContentScale.Crop
-            )
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            
             Text(
-                text = "BRAND SHOE",
+                text = "BRAND_SHOE",
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF1A1A1A),
-                letterSpacing = 8.sp
+                color = Color.White,
+                letterSpacing = 4.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "STEP INTO STYLE",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+                color = Color.White.copy(alpha = 0.8f),
+                letterSpacing = 6.sp
             )
         }
-        
-        Text(
-            text = "Step into Luxury",
+
+        Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 60.dp),
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color.Gray,
-            letterSpacing = 2.sp
-        )
+                .padding(bottom = 80.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(180.dp)
+                    .height(1.5.dp)
+                    .background(Color.White.copy(alpha = 0.7f))
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = "LOADING PRECISION",
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Light,
+                color = Color.White.copy(alpha = 0.5f),
+                letterSpacing = 3.sp
+            )
+        }
     }
 }
 

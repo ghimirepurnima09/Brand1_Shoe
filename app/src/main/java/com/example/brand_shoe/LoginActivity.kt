@@ -1,6 +1,5 @@
 package com.example.brand_shoe
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -27,6 +26,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.brand_shoe.ViewModel.UserViewModel
+import com.example.brand_shoe.ViewModel.UserViewModelFactory
+import com.example.brand_shoe.repo.UserRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
 
 class LoginActivity : ComponentActivity() {
@@ -60,7 +63,9 @@ fun LoginContent(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isLoading by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val viewModel: UserViewModel = viewModel(factory = UserViewModelFactory(UserRepoImpl()))
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(
@@ -71,7 +76,6 @@ fun LoginContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // circular Logo
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo",
@@ -81,7 +85,7 @@ fun LoginContent(
                     .border(3.dp, MaterialTheme.colorScheme.primary, CircleShape),
                 contentScale = ContentScale.Crop
             )
-            
+
             Spacer(modifier = Modifier.height(32.dp))
             Text(
                 text = "Welcome Back",
@@ -115,7 +119,7 @@ fun LoginContent(
                 singleLine = true,
                 shape = CircleShape
             )
-            
+
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
                 TextButton(onClick = onForgetPasswordClick) {
                     Text("Forgot Password?", fontWeight = FontWeight.SemiBold)
@@ -125,24 +129,24 @@ fun LoginContent(
             Spacer(modifier = Modifier.height(24.dp))
             Button(
                 onClick = {
-                    val sharedPref = context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE)
-                    val registeredEmail = sharedPref.getString("registeredEmail", "")
-                    val registeredPass = sharedPref.getString("registeredPassword", "")
-
-                    if (email.isNotEmpty() && email == registeredEmail && password == registeredPass) {
-                        Toast.makeText(context, "Log In Successful!", Toast.LENGTH_SHORT).show()
-                        onLoginSuccess()
-                    } else {
-                        // Requested exact message
-                        Toast.makeText(context, "password or email is incorrect try again", Toast.LENGTH_SHORT).show()
+                    if (email.isBlank() || password.isBlank()) {
+                        Toast.makeText(context, "Please enter email and password", Toast.LENGTH_SHORT).show()
+                        return@Button
+                    }
+                    isLoading = true
+                    viewModel.login(email.trim(), password) { success, message ->
+                        isLoading = false
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        if (success) onLoginSuccess()
                     }
                 },
+                enabled = !isLoading,
                 modifier = Modifier.fillMaxWidth().height(55.dp),
                 shape = CircleShape
             ) {
-                Text("LOG IN", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
+                Text(if (isLoading) "SIGNING IN..." else "LOG IN", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("New here?")
