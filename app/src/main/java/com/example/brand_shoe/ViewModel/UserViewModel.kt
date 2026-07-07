@@ -31,6 +31,10 @@ class UserViewModel(val repo: UserRepo) : ViewModel() {
         repo.forgetPassword(email, callback)
     }
 
+    fun fetchAllUsers(callback: (Boolean, String, List<UserModel?>) -> Unit) {
+        repo.getAllUser(callback)
+    }
+
     private val _loading = MutableLiveData<Boolean>()
     val loading: MutableLiveData<Boolean> get() = _loading
 
