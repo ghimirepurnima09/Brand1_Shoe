@@ -31,7 +31,6 @@ import com.example.brand_shoe.ViewModel.UserViewModel
 import com.example.brand_shoe.ViewModel.UserViewModelFactory
 import com.example.brand_shoe.repo.UserRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
-import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,12 +43,9 @@ class LoginActivity : ComponentActivity() {
                         startActivity(Intent(this, HomePageActivity::class.java))
                         finish()
                     },
-                    onAdminLoginSuccess = {
-                        startActivity(Intent(this, AdminDashboardActivity::class.java))
-                        finish()
-                    },
                     onRegisterClick = { startActivity(Intent(this, RegistrationActivity::class.java)) },
-                    onForgetPasswordClick = { startActivity(Intent(this, ForgetPasswordActivity::class.java)) }
+                    onForgetPasswordClick = { startActivity(Intent(this, ForgetPasswordActivity::class.java)) },
+                    onAdminLoginClick = { startActivity(Intent(this, AdminLoginActivity::class.java)) }
                 )
             }
         }
@@ -59,9 +55,9 @@ class LoginActivity : ComponentActivity() {
 @Composable
 fun LoginContent(
     onLoginSuccess: () -> Unit,
-    onAdminLoginSuccess: () -> Unit,
     onRegisterClick: () -> Unit,
-    onForgetPasswordClick: () -> Unit
+    onForgetPasswordClick: () -> Unit,
+    onAdminLoginClick: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -112,17 +108,9 @@ fun LoginContent(
                     }
                     isLoading = true
                     viewModel.login(email.trim(), password) { success, message ->
-                        if (success) {
-                            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-                            UserRepoImpl().getUserId(uid) { _, _, profile ->
-                                isLoading = false
-                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                                if (profile?.role == "admin") onAdminLoginSuccess() else onLoginSuccess()
-                            }
-                        } else {
-                            isLoading = false
-                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                        }
+                        isLoading = false
+                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        if (success) onLoginSuccess()
                     }
                 },
                 enabled = !isLoading,
@@ -136,6 +124,11 @@ fun LoginContent(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("New here?")
                 TextButton(onClick = onRegisterClick) { Text("Create Account", fontWeight = FontWeight.Bold) }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(onClick = onAdminLoginClick) {
+                Text("Login as Admin", fontWeight = FontWeight.SemiBold, color = Color.Gray)
             }
         }
     }

@@ -12,4 +12,8 @@
     <string name="title_activity_admin_order_activity.kt">AdminOrderActivity.kt</string>
     <string name="title_activity_admin_user_activity.kt">AdminUserActivity.kt</string>
     <string name="title_activity_product_detail_activity.kt">ProductDetailActivity.kt</string>
+    <string name="title_activity_admin_login_activity.kt">AdminLoginActivity.kt</string>
+    <string name="title_activity_cart_activity.kt">CartActivity.kt</string>
+    <string name="title_activity_cart">CartActivity</string>
+    <string name="title_activity_order_confirmation">OrderConfirmationActivity</string>
 </resources>

@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
@@ -13,34 +12,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Brand_Shoe">
         <activity
-            android:name=".ProductDetailActivity.kt"
+            android:name=".OrderConfirmationActivity"
             android:exported="false"
-            android:label="@string/title_activity_product_detail_activity.kt"
+            android:label="@string/title_activity_order_confirmation"
             android:theme="@style/Theme.Brand_Shoe" />
         <activity
-            android:name=".AdminUserActivity.kt"
+            android:name=".CartActivity"
             android:exported="false"
-            android:label="@string/title_activity_admin_user_activity.kt"
+            android:label="@string/title_activity_cart"
             android:theme="@style/Theme.Brand_Shoe" />
         <activity
-            android:name=".AdminOrderActivity.kt"
+            android:name=".CartActivity.kt"
             android:exported="false"
-            android:label="@string/title_activity_admin_order_activity.kt"
+            android:label="@string/title_activity_cart_activity.kt"
             android:theme="@style/Theme.Brand_Shoe" />
         <activity
-            android:name=".AdminProductActivity.kt"
+            android:name=".AdminLoginActivity.kt"
             android:exported="false"
-            android:label="@string/title_activity_admin_product_activity.kt"
-            android:theme="@style/Theme.Brand_Shoe" />
-        <activity
-            android:name=".AdminDashboardActivity.kt"
-            android:exported="false"
-            android:label="@string/title_activity_admin_dashboard_activity.kt"
-            android:theme="@style/Theme.Brand_Shoe" />
-        <activity
-            android:name=".CartManager.kt"
-            android:exported="false"
-            android:label="@string/title_activity_cart_manager.kt"
+            android:label="@string/title_activity_admin_login_activity.kt"
             android:theme="@style/Theme.Brand_Shoe" />
         <activity
             android:name=".SplashScreenActivity"
@@ -57,6 +46,9 @@
             android:exported="false" />
         <activity
             android:name=".LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminLoginActivity"
             android:exported="false" />
         <activity
             android:name=".RegistrationActivity"

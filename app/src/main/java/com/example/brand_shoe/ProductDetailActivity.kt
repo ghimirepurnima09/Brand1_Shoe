@@ -1,5 +1,6 @@
 package com.example.brand_shoe
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -53,7 +54,9 @@ class ProductDetailActivity : ComponentActivity() {
                     productPrice = productPrice,
                     productDescription = productDescription,
                     productImageKey = productImageKey,
-                    onBackClick = { finish() }
+                    onBackClick = { finish() },
+                    onAddToCart = { startActivity(Intent(this, CartActivity::class.java)) },
+                    onOrderPlaced = { startActivity(Intent(this, OrderConfirmationActivity::class.java)) }
                 )
             }
         }
@@ -68,7 +71,9 @@ fun ProductDetailScreen(
     productPrice: Double,
     productDescription: String,
     productImageKey: String,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onAddToCart: () -> Unit,
+    onOrderPlaced: () -> Unit
 ) {
     val context = LocalContext.current
     val viewModel: OrderViewModel = viewModel(factory = OrderViewModelFactory(OrderRepoImpl()))
@@ -124,8 +129,8 @@ fun ProductDetailScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(
                         onClick = {
-                            CartManager.addToCart()
-                            Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show()
+                            CartManager.addToCart(productId, productName, productPrice, productImageKey)
+                            onAddToCart()
                         },
                         modifier = Modifier.weight(1f).height(52.dp),
                         shape = RoundedCornerShape(16.dp)
@@ -150,9 +155,8 @@ fun ProductDetailScreen(
                             viewModel.placeOrder(order) { success, message ->
                                 isPlacingOrder = false
                                 if (success) {
-                                    val confirmMsg = "Your order is confirmed successfully"
-                                    Toast.makeText(context, confirmMsg, Toast.LENGTH_LONG).show()
-                                    showOrderNotification(context, confirmMsg)
+                                    showOrderNotification(context, "Your order is confirmed successfully")
+                                    onOrderPlaced()
                                 } else {
                                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                                 }
@@ -174,6 +178,6 @@ fun ProductDetailScreen(
 @Composable
 fun ProductDetailPreview() {
     Brand_ShoeTheme {
-        ProductDetailScreen("1", "Nike Air Max", 120.0, "A great shoe.", "shoe1", onBackClick = {})
+        ProductDetailScreen("1", "Nike Air Max", 120.0, "A great shoe.", "shoe1", onBackClick = {}, onAddToCart = {}, onOrderPlaced = {})
     }
 }

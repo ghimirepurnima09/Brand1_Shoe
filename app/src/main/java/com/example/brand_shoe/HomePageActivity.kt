@@ -60,7 +60,8 @@ class HomePageActivity : ComponentActivity() {
                         intent.putExtra("productDescription", product.description)
                         intent.putExtra("productImageKey", product.imageKey)
                         startActivity(intent)
-                    }
+                    },
+                    onCartClick = { startActivity(Intent(this, CartActivity::class.java)) }
                 )
             }
         }
@@ -69,7 +70,7 @@ class HomePageActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeDashboard(onLogout: () -> Unit, onProductClick: (ProductModel) -> Unit) {
+fun HomeDashboard(onLogout: () -> Unit, onProductClick: (ProductModel) -> Unit, onCartClick: () -> Unit) {
     val viewModel: ProductViewModel = viewModel(factory = ProductViewModelFactory(ProductRepoImpl()))
     var products by remember { mutableStateOf<List<ProductModel?>>(emptyList()) }
 
@@ -93,12 +94,14 @@ fun HomeDashboard(onLogout: () -> Unit, onProductClick: (ProductModel) -> Unit) 
                     }
                 },
                 actions = {
-                    BadgedBox(badge = {
-                        if (CartManager.cartCount.value > 0) {
-                            Badge { Text("${CartManager.cartCount.value}") }
+                    IconButton(onClick = onCartClick) {
+                        BadgedBox(badge = {
+                            if (CartManager.cartCount > 0) {
+                                Badge { Text("${CartManager.cartCount}") }
+                            }
+                        }) {
+                            Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
                         }
-                    }) {
-                        Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
                     }
                     IconButton(onClick = onLogout) {
                         Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
@@ -178,5 +181,5 @@ fun ProductGridItem(product: ProductModel, onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun HomeDashboardPreview() {
-    Brand_ShoeTheme { HomeDashboard(onLogout = {}, onProductClick = {}) }
+    Brand_ShoeTheme { HomeDashboard(onLogout = {}, onProductClick = {}, onCartClick = {}) }
 }
