@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -11,29 +12,71 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Brand_Shoe">
-
+        <activity
+            android:name=".AdminUserActivity.kt"
+            android:exported="false"
+            android:label="@string/title_activity_admin_user_activity.kt"
+            android:theme="@style/Theme.Brand_Shoe" />
+        <activity
+            android:name=".AdminOrderActivity.kt"
+            android:exported="false"
+            android:label="@string/title_activity_admin_order_activity.kt"
+            android:theme="@style/Theme.Brand_Shoe" />
+        <activity
+            android:name=".AdminProductActivity.kt"
+            android:exported="false"
+            android:label="@string/title_activity_admin_product_activity.kt"
+            android:theme="@style/Theme.Brand_Shoe" />
+        <activity
+            android:name=".AdminDashboardActivity.kt"
+            android:exported="false"
+            android:label="@string/title_activity_admin_dashboard_activity.kt"
+            android:theme="@style/Theme.Brand_Shoe" />
+        <activity
+            android:name=".CartManager.kt"
+            android:exported="false"
+            android:label="@string/title_activity_cart_manager.kt"
+            android:theme="@style/Theme.Brand_Shoe" />
         <activity
             android:name=".SplashScreenActivity"
             android:exported="true"
             android:theme="@style/Theme.Brand_Shoe">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity android:name=".Onboarding" android:exported="false" />
-        <activity android:name=".LoginActivity" android:exported="false" />
-        <activity android:name=".RegistrationActivity" android:exported="false" />
-        <activity android:name=".ForgetPasswordActivity" android:exported="false" />
-        <activity android:name=".HomePageActivity" android:exported="false" />
-        <activity android:name=".ProductDetailActivity" android:exported="false" />
-        <activity android:name=".AdminDashboardActivity" android:exported="false" />
-        <activity android:name=".AdminProductActivity" android:exported="false" />
-        <activity android:name=".AdminOrderActivity" android:exported="false" />
-        <activity android:name=".AdminUserActivity" android:exported="false" />
-
-
+        <activity
+            android:name=".Onboarding"
+            android:exported="false" />
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RegistrationActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ForgetPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HomePageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProductDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminOrderActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AdminUserActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

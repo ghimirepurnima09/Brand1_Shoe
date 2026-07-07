@@ -6,4 +6,9 @@
     <string name="title_activity_forget_password">ForgetPasswordActivity</string>
     <string name="title_activity_home_page">HomePageActivity</string>
     <string name="title_activity_onboarding">Onboarding</string>
+    <string name="title_activity_cart_manager.kt">CartManager.kt</string>
+    <string name="title_activity_admin_dashboard_activity.kt">AdminDashboardActivity.kt</string>
+    <string name="title_activity_admin_product_activity.kt">AdminProductActivity.kt</string>
+    <string name="title_activity_admin_order_activity.kt">AdminOrderActivity.kt</string>
+    <string name="title_activity_admin_user_activity.kt">AdminUserActivity.kt</string>
 </resources>
