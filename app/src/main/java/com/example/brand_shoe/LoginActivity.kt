@@ -31,6 +31,7 @@ import com.example.brand_shoe.ViewModel.UserViewModel
 import com.example.brand_shoe.ViewModel.UserViewModelFactory
 import com.example.brand_shoe.repo.UserRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,12 +44,12 @@ class LoginActivity : ComponentActivity() {
                         startActivity(Intent(this, HomePageActivity::class.java))
                         finish()
                     },
-                    onRegisterClick = {
-                        startActivity(Intent(this, RegistrationActivity::class.java))
+                    onAdminLoginSuccess = {
+                        startActivity(Intent(this, AdminDashboardActivity::class.java))
+                        finish()
                     },
-                    onForgetPasswordClick = {
-                        startActivity(Intent(this, ForgetPasswordActivity::class.java))
-                    }
+                    onRegisterClick = { startActivity(Intent(this, RegistrationActivity::class.java)) },
+                    onForgetPasswordClick = { startActivity(Intent(this, ForgetPasswordActivity::class.java)) }
                 )
             }
         }
@@ -58,6 +59,7 @@ class LoginActivity : ComponentActivity() {
 @Composable
 fun LoginContent(
     onLoginSuccess: () -> Unit,
+    onAdminLoginSuccess: () -> Unit,
     onRegisterClick: () -> Unit,
     onForgetPasswordClick: () -> Unit
 ) {
@@ -69,61 +71,36 @@ fun LoginContent(
 
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(24.dp),
+            modifier = Modifier.padding(innerPadding).fillMaxSize().padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = "Logo",
-                modifier = Modifier
-                    .size(130.dp)
-                    .clip(CircleShape)
-                    .border(3.dp, MaterialTheme.colorScheme.primary, CircleShape),
+                modifier = Modifier.size(130.dp).clip(CircleShape).border(3.dp, MaterialTheme.colorScheme.primary, CircleShape),
                 contentScale = ContentScale.Crop
             )
 
             Spacer(modifier = Modifier.height(32.dp))
-            Text(
-                text = "Welcome Back",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "Sign in to your account",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
-            )
+            Text("Welcome Back", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
+            Text("Sign in to your account", style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
             Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                singleLine = true,
-                shape = CircleShape
+                value = email, onValueChange = { email = it }, label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth(), keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                singleLine = true, shape = CircleShape
             )
             Spacer(modifier = Modifier.height(16.dp))
             OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") },
-                modifier = Modifier.fillMaxWidth(),
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                singleLine = true,
-                shape = CircleShape
+                value = password, onValueChange = { password = it }, label = { Text("Password") },
+                modifier = Modifier.fillMaxWidth(), visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password), singleLine = true, shape = CircleShape
             )
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                TextButton(onClick = onForgetPasswordClick) {
-                    Text("Forgot Password?", fontWeight = FontWeight.SemiBold)
-                }
+                TextButton(onClick = onForgetPasswordClick) { Text("Forgot Password?", fontWeight = FontWeight.SemiBold) }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -135,9 +112,17 @@ fun LoginContent(
                     }
                     isLoading = true
                     viewModel.login(email.trim(), password) { success, message ->
-                        isLoading = false
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                        if (success) onLoginSuccess()
+                        if (success) {
+                            val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                            UserRepoImpl().getUserId(uid) { _, _, profile ->
+                                isLoading = false
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                if (profile?.role == "admin") onAdminLoginSuccess() else onLoginSuccess()
+                            }
+                        } else {
+                            isLoading = false
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
                     }
                 },
                 enabled = !isLoading,
@@ -150,9 +135,7 @@ fun LoginContent(
             Spacer(modifier = Modifier.height(16.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("New here?")
-                TextButton(onClick = onRegisterClick) {
-                    Text("Create Account", fontWeight = FontWeight.Bold)
-                }
+                TextButton(onClick = onRegisterClick) { Text("Create Account", fontWeight = FontWeight.Bold) }
             }
         }
     }
@@ -161,7 +144,5 @@ fun LoginContent(
 @Preview(showBackground = true)
 @Composable
 fun LoginPreview() {
-    Brand_ShoeTheme {
-        LoginContent({}, {}, {})
-    }
+    Brand_ShoeTheme { LoginContent({}, {}, {}, {}) }
 }

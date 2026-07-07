@@ -13,6 +13,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Brand_Shoe">
         <activity
+            android:name=".ProductDetailActivity.kt"
+            android:exported="false"
+            android:label="@string/title_activity_product_detail_activity.kt"
+            android:theme="@style/Theme.Brand_Shoe" />
+        <activity
             android:name=".AdminUserActivity.kt"
             android:exported="false"
             android:label="@string/title_activity_admin_user_activity.kt"

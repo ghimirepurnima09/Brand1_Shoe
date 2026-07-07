@@ -25,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.brand_shoe.repo.UserRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
@@ -38,13 +39,17 @@ class SplashScreenActivity : ComponentActivity() {
             Brand_ShoeTheme {
                 SplashScreenContent(
                     onTimeout = {
-                        val target = if (FirebaseAuth.getInstance().currentUser != null) {
-                            HomePageActivity::class.java
+                        val uid = FirebaseAuth.getInstance().currentUser?.uid
+                        if (uid == null) {
+                            startActivity(Intent(this, Onboarding::class.java))
+                            finish()
                         } else {
-                            Onboarding::class.java
+                            UserRepoImpl().getUserId(uid) { _, _, profile ->
+                                val target = if (profile?.role == "admin") AdminDashboardActivity::class.java else HomePageActivity::class.java
+                                startActivity(Intent(this, target))
+                                finish()
+                            }
                         }
-                        startActivity(Intent(this, target))
-                        finish()
                     }
                 )
             }
@@ -59,11 +64,7 @@ fun SplashScreenContent(onTimeout: () -> Unit) {
         onTimeout()
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
+    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         Image(
             painter = painterResource(id = R.drawable.shoe1),
             contentDescription = null,
@@ -74,61 +75,23 @@ fun SplashScreenContent(onTimeout: () -> Unit) {
         )
 
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.3f),
-                            Color.Transparent,
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.5f)
-                        )
-                    )
+            modifier = Modifier.fillMaxSize().background(
+                Brush.verticalGradient(
+                    colors = listOf(Color.White.copy(alpha = 0.3f), Color.Transparent, Color.Transparent, Color.Black.copy(alpha = 0.5f))
                 )
+            )
         )
 
-        Column(
-            modifier = Modifier.align(Alignment.Center),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "BRAND_SHOE",
-                style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color.White,
-                letterSpacing = 4.sp
-            )
+        Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("BRAND_SHOE", style = MaterialTheme.typography.displaySmall, fontWeight = FontWeight.ExtraBold, color = Color.White, letterSpacing = 4.sp)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "STEP INTO STYLE",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.8f),
-                letterSpacing = 6.sp
-            )
+            Text("STEP INTO STYLE", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium, color = Color.White.copy(alpha = 0.8f), letterSpacing = 6.sp)
         }
 
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 80.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(180.dp)
-                    .height(1.5.dp)
-                    .background(Color.White.copy(alpha = 0.7f))
-            )
+        Column(modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Box(modifier = Modifier.width(180.dp).height(1.5.dp).background(Color.White.copy(alpha = 0.7f)))
             Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = "LOADING PRECISION",
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Light,
-                color = Color.White.copy(alpha = 0.5f),
-                letterSpacing = 3.sp
-            )
+            Text("LOADING PRECISION", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Light, color = Color.White.copy(alpha = 0.5f), letterSpacing = 3.sp)
         }
     }
 }
@@ -136,7 +99,5 @@ fun SplashScreenContent(onTimeout: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun SplashScreenPreview() {
-    Brand_ShoeTheme {
-        SplashScreenContent(onTimeout = {})
-    }
+    Brand_ShoeTheme { SplashScreenContent(onTimeout = {}) }
 }
