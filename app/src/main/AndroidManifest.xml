@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -26,6 +27,12 @@
         <activity android:name=".RegistrationActivity" android:exported="false" />
         <activity android:name=".ForgetPasswordActivity" android:exported="false" />
         <activity android:name=".HomePageActivity" android:exported="false" />
+        <activity android:name=".ProductDetailActivity" android:exported="false" />
+        <activity android:name=".AdminDashboardActivity" android:exported="false" />
+        <activity android:name=".AdminProductActivity" android:exported="false" />
+        <activity android:name=".AdminOrderActivity" android:exported="false" />
+        <activity android:name=".AdminUserActivity" android:exported="false" />
+
 
     </application>
 
