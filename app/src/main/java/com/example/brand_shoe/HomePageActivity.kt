@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -69,9 +70,15 @@ class HomePageActivity : ComponentActivity() {
 fun HomeDashboard(onProductClick: (ProductModel) -> Unit, onCartClick: () -> Unit, onProfileClick: () -> Unit) {
     val viewModel: ProductViewModel = viewModel(factory = ProductViewModelFactory(ProductRepoImpl()))
     var products by remember { mutableStateOf<List<ProductModel?>>(emptyList()) }
+    var searchQuery by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
         viewModel.getAllProducts { _, _, data -> products = data }
+    }
+
+    val filteredProducts = remember(products, searchQuery) {
+        if (searchQuery.isBlank()) products
+        else products.filter { it?.name?.contains(searchQuery, ignoreCase = true) == true }
     }
 
     Scaffold(
@@ -141,32 +148,46 @@ fun HomeDashboard(onProductClick: (ProductModel) -> Unit, onCartClick: () -> Uni
             Spacer(modifier = Modifier.height(20.dp))
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
                 placeholder = { Text("Search shoes...") },
                 modifier = Modifier.fillMaxWidth(),
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                trailingIcon = {
+                    if (searchQuery.isNotEmpty()) {
+                        IconButton(onClick = { searchQuery = "" }) {
+                            Icon(Icons.Default.Close, contentDescription = "Clear search")
+                        }
+                    }
+                },
+                singleLine = true,
                 shape = RoundedCornerShape(18.dp),
                 colors = OutlinedTextFieldDefaults.colors(
                     unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = MaterialTheme.colorScheme.primary
+                    unfocusedBorderColor = Color.Transparent,
+                    focusedBorderColor = MaterialTheme.colorScheme.primary
                 )
             )
 
             Spacer(modifier = Modifier.height(28.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text("New Arrivals", style = MaterialTheme.typography.headlineSmall)
-                Text("${products.size} items", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    if (searchQuery.isBlank()) "New Arrivals" else "Results for \"$searchQuery\"",
+                    style = MaterialTheme.typography.headlineSmall
+                )
+                Text("${filteredProducts.size} items", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (products.isEmpty()) {
+            if (filteredProducts.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No products yet — check back soon!", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        if (searchQuery.isBlank()) "No products yet — check back soon!" else "No shoes match \"$searchQuery\"",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             } else {
                 LazyVerticalGrid(
@@ -176,7 +197,7 @@ fun HomeDashboard(onProductClick: (ProductModel) -> Unit, onCartClick: () -> Uni
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 24.dp)
                 ) {
-                    items(products) { product ->
+                    items(filteredProducts) { product ->
                         product?.let { ProductGridItem(it, onClick = { onProductClick(it) }) }
                     }
                 }

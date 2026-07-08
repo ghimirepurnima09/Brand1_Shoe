@@ -18,4 +18,5 @@
     <string name="title_activity_order_confirmation">OrderConfirmationActivity</string>
     <string name="title_activity_user_profile">UserProfileActivity</string>
     <string name="title_activity_admin_profile">AdminProfileActivity</string>
+    <string name="title_activity_admin_registration">AdminRegistrationActivity</string>
 </resources>

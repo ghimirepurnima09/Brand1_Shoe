@@ -13,8 +13,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -176,7 +176,7 @@ fun UserProfileScreen(onBackClick: () -> Unit, onLogout: () -> Unit) {
                                     Text(it.productName, fontWeight = FontWeight.Bold)
                                     Text("Qty: ${it.quantity} · $${"%.2f".format(it.price)}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                                 }
-                                AssistChip(onClick = {}, label = { Text(it.status) })
+                                StatusBadge(it.status)
                             }
                         }
                     }
@@ -191,7 +191,7 @@ fun UserProfileScreen(onBackClick: () -> Unit, onLogout: () -> Unit) {
                     shape = CircleShape,
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Red)
                 ) {
-                    Icon(Icons.Default.ExitToApp, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Logout", fontWeight = FontWeight.Bold)
                 }

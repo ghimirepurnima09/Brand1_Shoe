@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,6 +42,10 @@ import com.example.brand_shoe.ViewModel.UserViewModel
 import com.example.brand_shoe.ViewModel.UserViewModelFactory
 import com.example.brand_shoe.repo.UserRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
+import com.google.firebase.auth.FirebaseAuth
+
+private const val ADMIN_EMAIL = "admin123@gmail.com"
+private const val ADMIN_PASSWORD = "admin@123"
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -49,13 +54,16 @@ class LoginActivity : ComponentActivity() {
         setContent {
             Brand_ShoeTheme {
                 LoginContent(
-                    onLoginSuccess = {
+                    onNavigateHome = {
                         startActivity(Intent(this, HomePageActivity::class.java))
                         finish()
                     },
+                    onNavigateAdmin = {
+                        startActivity(Intent(this, AdminDashboardActivity::class.java))
+                        finish()
+                    },
                     onRegisterClick = { startActivity(Intent(this, RegistrationActivity::class.java)) },
-                    onForgetPasswordClick = { startActivity(Intent(this, ForgetPasswordActivity::class.java)) },
-                    onAdminLoginClick = { startActivity(Intent(this, AdminLoginActivity::class.java)) }
+                    onForgetPasswordClick = { startActivity(Intent(this, ForgetPasswordActivity::class.java)) }
                 )
             }
         }
@@ -64,17 +72,58 @@ class LoginActivity : ComponentActivity() {
 
 @Composable
 fun LoginContent(
-    onLoginSuccess: () -> Unit,
+    onNavigateHome: () -> Unit,
+    onNavigateAdmin: () -> Unit,
     onRegisterClick: () -> Unit,
-    onForgetPasswordClick: () -> Unit,
-    onAdminLoginClick: () -> Unit
+    onForgetPasswordClick: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
+    var isAdminLoading by remember { mutableStateOf(false) }
+    var waitingForRole by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val viewModel: UserViewModel = viewModel(factory = UserViewModelFactory(UserRepoImpl()))
+
+    val userProfile by viewModel.users.observeAsState()
+    val isViewModelLoading by viewModel.loading.observeAsState(false)
+
+    // Fires whenever the fetched profile changes or loading finishes
+    LaunchedEffect(userProfile, isViewModelLoading) {
+        if (waitingForRole && !isViewModelLoading) {
+            if (userProfile != null) {
+                waitingForRole = false
+                isLoading = false
+                isAdminLoading = false
+
+                // Role check (case-insensitive for better reliability)
+                if (userProfile?.role?.lowercase() == "admin") {
+                    onNavigateAdmin()
+                } else {
+                    onNavigateHome()
+                }
+            } else {
+                // If loading finished but userProfile is still null, it means the fetch failed
+                waitingForRole = false
+                isLoading = false
+                isAdminLoading = false
+                Toast.makeText(context, "Error: User profile not found in database. Please check your UID entry.", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    fun startRoleLookup() {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        if (uid.isNullOrBlank()) {
+            isLoading = false
+            isAdminLoading = false
+            Toast.makeText(context, "Could not verify user", Toast.LENGTH_SHORT).show()
+            return
+        }
+        waitingForRole = true
+        viewModel.getUserId(uid)
+    }
 
     Box(
         modifier = Modifier
@@ -132,7 +181,7 @@ fun LoginContent(
                     singleLine = true,
                     shape = RoundedCornerShape(18.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
                         cursorColor = MaterialTheme.colorScheme.primary
                     )
                 )
@@ -155,7 +204,7 @@ fun LoginContent(
                     singleLine = true,
                     shape = RoundedCornerShape(18.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedIndicatorColor = MaterialTheme.colorScheme.primary,
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
                         cursorColor = MaterialTheme.colorScheme.primary
                     )
                 )
@@ -175,12 +224,15 @@ fun LoginContent(
                         }
                         isLoading = true
                         viewModel.login(email.trim(), password) { success, message ->
-                            isLoading = false
-                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
-                            if (success) onLoginSuccess()
+                            if (success) {
+                                startRoleLookup()
+                            } else {
+                                isLoading = false
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            }
                         }
                     },
-                    enabled = !isLoading,
+                    enabled = !isLoading && !isAdminLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
@@ -204,7 +256,18 @@ fun LoginContent(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OutlinedButton(
-                    onClick = onAdminLoginClick,
+                    onClick = {
+                        isAdminLoading = true
+                        viewModel.login(ADMIN_EMAIL, ADMIN_PASSWORD) { success, message ->
+                            if (success) {
+                                startRoleLookup()
+                            } else {
+                                isAdminLoading = false
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    },
+                    enabled = !isLoading && !isAdminLoading,
                     modifier = Modifier.fillMaxWidth().height(52.dp),
                     shape = CircleShape,
                     border = BorderStroke(1.5.dp, MaterialTheme.colorScheme.secondary),
@@ -212,7 +275,7 @@ fun LoginContent(
                 ) {
                     Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Login as Admin", fontWeight = FontWeight.Bold)
+                    Text(if (isAdminLoading) "SIGNING IN..." else "Login as Admin", fontWeight = FontWeight.Bold)
                 }
             }
         }

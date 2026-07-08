@@ -9,11 +9,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.automirrored.filled.ReceiptLong
 import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -71,7 +71,7 @@ fun AdminDashboardScreen(
                         Icon(Icons.Default.AccountCircle, contentDescription = "My Profile")
                     }
                     IconButton(onClick = onLogout) {
-                        Icon(Icons.Default.ExitToApp, contentDescription = "Logout")
+                        Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
                     }
                 },
                 colors = TopAppBarDefaults.largeTopAppBarColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
@@ -83,7 +83,7 @@ fun AdminDashboardScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             AdminMenuCard("Manage Products", "Add, edit or remove shoes", Icons.Default.Inventory, onManageProducts)
-            AdminMenuCard("Manage Orders", "View and update order status", Icons.Default.ReceiptLong, onManageOrders)
+            AdminMenuCard("Manage Orders", "View and update order status", Icons.AutoMirrored.Filled.ReceiptLong, onManageOrders)
             AdminMenuCard("Manage Users", "View and remove customer accounts", Icons.Default.People, onManageUsers)
         }
     }

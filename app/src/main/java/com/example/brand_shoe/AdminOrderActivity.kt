@@ -5,9 +5,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -15,7 +17,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,7 +63,7 @@ fun AdminOrderScreen(onBackClick: () -> Unit) {
     ) { innerPadding ->
         if (orders.isEmpty()) {
             Box(modifier = Modifier.padding(innerPadding).fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("No orders yet", color = Color.Gray)
+                Text("No orders yet", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             LazyColumn(
@@ -89,25 +90,51 @@ fun AdminOrderScreen(onBackClick: () -> Unit) {
 fun OrderAdminRow(order: OrderModel, onStatusChange: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
 
-    Card(shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
+    Card(shape = RoundedCornerShape(18.dp), modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(order.productName, fontWeight = FontWeight.Bold)
-            Text("Customer: ${order.userName}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            Text("Qty: ${order.quantity}  ·  $${"%.2f".format(order.price)}  ·  ${order.paymentMethod}", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
-            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(order.productName, fontWeight = FontWeight.Bold)
+                    Text("Customer: ${order.userName}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                StatusBadge(order.status)
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "Qty: ${order.quantity}  ·  $${"%.2f".format(order.price)}  ·  ${order.paymentMethod}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(12.dp))
 
             ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
                 OutlinedTextField(
                     value = order.status,
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Status") },
+                    label = { Text("Update status") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                    modifier = Modifier.menuAnchor().fillMaxWidth()
+                    modifier = Modifier.menuAnchor().fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp)
                 )
                 ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     orderStatuses.forEach { status ->
-                        DropdownMenuItem(text = { Text(status) }, onClick = { expanded = false; onStatusChange(status) })
+                        DropdownMenuItem(
+                            text = { Text(status) },
+                            leadingIcon = {
+                                Box(
+                                    modifier = Modifier
+                                        .size(10.dp)
+                                        .background(statusColor(status), CircleShape)
+                                )
+                            },
+                            onClick = { expanded = false; onStatusChange(status) }
+                        )
                     }
                 }
             }

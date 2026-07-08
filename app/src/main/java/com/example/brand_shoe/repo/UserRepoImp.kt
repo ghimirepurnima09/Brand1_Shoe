@@ -106,13 +106,17 @@ class UserRepoImpl : UserRepo {
                 if (snapshot.exists()) {
                     val user = snapshot.getValue(UserModel::class.java)
                     if (user != null) {
-                        callback(true, "user fetchd", user)
+                        callback(true, "User fetched successfully", user)
+                    } else {
+                        callback(false, "Failed to parse user data", null)
                     }
+                } else {
+                    callback(false, "User data not found in database", null)
                 }
             }
 
             override fun onCancelled(error: DatabaseError) {
-                callback(false, "${error.message}", null)
+                callback(false, error.message, null)
             }
         })
     }
@@ -129,6 +133,8 @@ class UserRepoImpl : UserRepo {
                         }
                     }
                     callback(true, "Users fetched", allUsers)
+                } else {
+                    callback(false, "No users found", emptyList())
                 }
             }
 
