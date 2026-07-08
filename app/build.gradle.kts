@@ -54,6 +54,19 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
     implementation("androidx.compose.runtime:runtime-livedata:1.7.0")
 
+    // Firebase (Auth + Realtime Database only — Storage no longer used)
+    implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
+
+    // Coroutines Play Services (Required for .await() on Firebase tasks)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
+
+    // Image Loading
+    implementation("io.coil-kt.coil3:coil-compose:3.5.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.5.0")
+
+    // Cloudinary SDK for image upload
+    implementation("com.cloudinary:cloudinary-android:3.0.2")
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

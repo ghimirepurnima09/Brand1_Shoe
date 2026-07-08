@@ -9,7 +9,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -23,11 +22,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,7 +44,7 @@ class ProductDetailActivity : ComponentActivity() {
         val productName = intent.getStringExtra("productName") ?: ""
         val productPrice = intent.getDoubleExtra("productPrice", 0.0)
         val productDescription = intent.getStringExtra("productDescription") ?: ""
-        val productImageKey = intent.getStringExtra("productImageKey") ?: "shoe1"
+        val productImageUrl = intent.getStringExtra("productImageUrl") ?: ""
 
         setContent {
             Brand_ShoeTheme {
@@ -57,7 +53,7 @@ class ProductDetailActivity : ComponentActivity() {
                     productName = productName,
                     productPrice = productPrice,
                     productDescription = productDescription,
-                    productImageKey = productImageKey,
+                    productImageUrl = productImageUrl,
                     onBackClick = { finish() },
                     onAddToCart = { startActivity(Intent(this, CartActivity::class.java)) },
                     onOrderPlaced = { startActivity(Intent(this, OrderConfirmationActivity::class.java)) }
@@ -73,7 +69,7 @@ fun ProductDetailScreen(
     productName: String,
     productPrice: Double,
     productDescription: String,
-    productImageKey: String,
+    productImageUrl: String,
     onBackClick: () -> Unit,
     onAddToCart: () -> Unit,
     onOrderPlaced: () -> Unit
@@ -94,17 +90,12 @@ fun ProductDetailScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(320.dp)
-                    .background(
-                        Brush.verticalGradient(
-                            0f to MaterialTheme.colorScheme.primaryContainer,
-                            1f to MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-            ) {
+            Box(modifier = Modifier.fillMaxWidth().height(320.dp)) {
+                ProductImage(
+                    imageUrl = productImageUrl,
+                    contentDescription = productName,
+                    modifier = Modifier.fillMaxSize()
+                )
                 IconButton(
                     onClick = onBackClick,
                     modifier = Modifier
@@ -113,12 +104,6 @@ fun ProductDetailScreen(
                 ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                 }
-                Image(
-                    painter = painterResource(id = imageKeyToDrawable(productImageKey)),
-                    contentDescription = productName,
-                    modifier = Modifier.align(Alignment.Center).size(230.dp),
-                    contentScale = ContentScale.Fit
-                )
             }
 
             Column(
@@ -158,7 +143,7 @@ fun ProductDetailScreen(
         ) {
             OutlinedButton(
                 onClick = {
-                    CartManager.addToCart(productId, productName, productPrice, productImageKey)
+                    CartManager.addToCart(productId, productName, productPrice, productImageUrl)
                     onAddToCart()
                 },
                 modifier = Modifier.weight(1f).height(54.dp),
@@ -208,6 +193,6 @@ fun ProductDetailScreen(
 @Composable
 fun ProductDetailPreview() {
     Brand_ShoeTheme {
-        ProductDetailScreen("1", "Nike Air Max", 120.0, "A great shoe.", "shoe1", onBackClick = {}, onAddToCart = {}, onOrderPlaced = {})
+        ProductDetailScreen("1", "Nike Air Max", 120.0, "A great shoe.", "", onBackClick = {}, onAddToCart = {}, onOrderPlaced = {})
     }
 }

@@ -6,8 +6,6 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,10 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -128,7 +123,7 @@ fun CartScreen(onBackClick: () -> Unit, onOrderPlaced: () -> Unit) {
     ) { innerPadding ->
         if (cartItems.isEmpty()) {
             Box(modifier = Modifier.padding(innerPadding).fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text("Your cart is empty", color = Color.Gray)
+                Text("Your cart is empty", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         } else {
             LazyColumn(
@@ -148,17 +143,11 @@ fun CartScreen(onBackClick: () -> Unit, onOrderPlaced: () -> Unit) {
 fun CartItemRow(item: CartItem) {
     Card(shape = RoundedCornerShape(16.dp), modifier = Modifier.fillMaxWidth()) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                modifier = Modifier.size(64.dp).clip(RoundedCornerShape(12.dp)).background(Color(0xFFF1F1F1)),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = imageKeyToDrawable(item.imageKey)),
-                    contentDescription = item.name,
-                    modifier = Modifier.size(48.dp),
-                    contentScale = ContentScale.Fit
-                )
-            }
+            ProductImage(
+                imageUrl = item.imageUrl,
+                contentDescription = item.name,
+                modifier = Modifier.size(64.dp).clip(RoundedCornerShape(12.dp))
+            )
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(item.name, fontWeight = FontWeight.Bold, maxLines = 1)

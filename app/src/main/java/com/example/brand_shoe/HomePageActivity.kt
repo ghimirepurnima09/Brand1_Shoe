@@ -38,6 +38,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.brand_shoe.Model.ProductModel
 import com.example.brand_shoe.ViewModel.ProductViewModel
 import com.example.brand_shoe.ViewModel.ProductViewModelFactory
+import com.example.brand_shoe.repo.ImageRepoImpl
 import com.example.brand_shoe.repo.ProductRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
 
@@ -54,7 +55,7 @@ class HomePageActivity : ComponentActivity() {
                         intent.putExtra("productName", product.name)
                         intent.putExtra("productPrice", product.price)
                         intent.putExtra("productDescription", product.description)
-                        intent.putExtra("productImageKey", product.imageKey)
+                        intent.putExtra("productImageUrl", product.imageUrl)
                         startActivity(intent)
                     },
                     onCartClick = { startActivity(Intent(this, CartActivity::class.java)) },
@@ -68,7 +69,9 @@ class HomePageActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeDashboard(onProductClick: (ProductModel) -> Unit, onCartClick: () -> Unit, onProfileClick: () -> Unit) {
-    val viewModel: ProductViewModel = viewModel(factory = ProductViewModelFactory(ProductRepoImpl()))
+    val viewModel: ProductViewModel = viewModel(
+        factory = ProductViewModelFactory(ProductRepoImpl(), ImageRepoImpl())
+    )
     var products by remember { mutableStateOf<List<ProductModel?>>(emptyList()) }
     var searchQuery by remember { mutableStateOf("") }
 
@@ -215,21 +218,11 @@ fun ProductGridItem(product: ProductModel, onClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(130.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    painter = painterResource(id = imageKeyToDrawable(product.imageKey)),
-                    contentDescription = product.name,
-                    modifier = Modifier.size(104.dp),
-                    contentScale = ContentScale.Fit
-                )
-            }
+            ProductImage(
+                imageUrl = product.imageUrl,
+                contentDescription = product.name,
+                modifier = Modifier.fillMaxWidth().height(130.dp).clip(RoundedCornerShape(16.dp))
+            )
             Spacer(modifier = Modifier.height(10.dp))
             Text(product.name, style = MaterialTheme.typography.titleMedium, maxLines = 1)
             Spacer(modifier = Modifier.height(2.dp))

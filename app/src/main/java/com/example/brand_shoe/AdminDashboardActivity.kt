@@ -15,13 +15,15 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.brand_shoe.repo.OrderRepoImpl
+import com.example.brand_shoe.repo.ProductRepoImpl
 import com.example.brand_shoe.repo.UserRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
 
@@ -57,6 +59,24 @@ fun AdminDashboardScreen(
     onMyProfile: () -> Unit,
     onLogout: () -> Unit
 ) {
+    var productCount by remember { mutableStateOf<Int?>(null) }
+    var orderCount by remember { mutableStateOf<Int?>(null) }
+    var userCount by remember { mutableStateOf<Int?>(null) }
+    var pendingOrderCount by remember { mutableStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        ProductRepoImpl().getAllProducts { _, _, data ->
+            productCount = data.size
+        }
+        OrderRepoImpl().getAllOrders { _, _, data ->
+            orderCount = data.size
+            pendingOrderCount = data.count { it?.status?.equals("pending", ignoreCase = true) == true }
+        }
+        UserRepoImpl().getAllUser { _, _, data ->
+            userCount = data.size
+        }
+    }
+
     Scaffold(
         topBar = {
             LargeTopAppBar(
@@ -82,9 +102,29 @@ fun AdminDashboardScreen(
             modifier = Modifier.padding(innerPadding).fillMaxSize().padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            AdminMenuCard("Manage Products", "Add, edit or remove shoes", Icons.Default.Inventory, onManageProducts)
-            AdminMenuCard("Manage Orders", "View and update order status", Icons.AutoMirrored.Filled.ReceiptLong, onManageOrders)
-            AdminMenuCard("Manage Users", "View and remove customer accounts", Icons.Default.People, onManageUsers)
+            AdminMenuCard(
+                title = "Manage Products",
+                subtitle = productCount?.let { "$it product${if (it == 1) "" else "s"} in store" }
+                    ?: "Add, edit or remove shoes",
+                icon = Icons.Default.Inventory,
+                onClick = onManageProducts
+            )
+            AdminMenuCard(
+                title = "Manage Orders",
+                subtitle = orderCount?.let {
+                    if (pendingOrderCount > 0) "$it total · $pendingOrderCount pending"
+                    else "$it total order${if (it == 1) "" else "s"}"
+                } ?: "View and update order status",
+                icon = Icons.AutoMirrored.Filled.ReceiptLong,
+                onClick = onManageOrders
+            )
+            AdminMenuCard(
+                title = "Manage Users",
+                subtitle = userCount?.let { "$it registered user${if (it == 1) "" else "s"}" }
+                    ?: "View and remove customer accounts",
+                icon = Icons.Default.People,
+                onClick = onManageUsers
+            )
         }
     }
 }

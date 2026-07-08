@@ -2,12 +2,18 @@ package com.example.brand_shoe.ViewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import com.example.brand_shoe.repo.ImageRepo
 import com.example.brand_shoe.repo.ProductRepo
 
-class ProductViewModelFactory(private val repo: ProductRepo) : ViewModelProvider.Factory {
+class ProductViewModelFactory(
+    private val repo: ProductRepo,
+    private val imageRepo: ImageRepo
+) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ProductViewModel::class.java)) return ProductViewModel(repo) as T
+        if (modelClass.isAssignableFrom(ProductViewModel::class.java)) {
+            return ProductViewModel(repo, imageRepo) as T
+        }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

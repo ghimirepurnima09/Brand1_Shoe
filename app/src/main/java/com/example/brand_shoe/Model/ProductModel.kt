@@ -5,7 +5,7 @@ data class ProductModel(
     val name: String = "",
     val price: Double = 0.0,
     val description: String = "",
-    val imageKey: String = "shoe1",
+    val imageUrl: String = "",
     val stock: Int = 0
 ) {
     fun toMap(): Map<String, Any?> {
@@ -13,7 +13,7 @@ data class ProductModel(
             "name" to name,
             "price" to price,
             "description" to description,
-            "imageKey" to imageKey,
+            "imageUrl" to imageUrl,
             "stock" to stock
         )
     }
