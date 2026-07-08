@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.automirrored.filled.ReceiptLong
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material3.*
@@ -36,6 +37,7 @@ class AdminDashboardActivity : ComponentActivity() {
                     onManageProducts = { startActivity(Intent(this, AdminProductActivity::class.java)) },
                     onManageOrders = { startActivity(Intent(this, AdminOrderActivity::class.java)) },
                     onManageUsers = { startActivity(Intent(this, AdminUserActivity::class.java)) },
+                    onMyProfile = { startActivity(Intent(this, AdminProfileActivity::class.java)) },
                     onLogout = {
                         CartManager.clearCart()
                         UserRepoImpl().logout { _, _ -> }
@@ -54,6 +56,7 @@ fun AdminDashboardScreen(
     onManageProducts: () -> Unit,
     onManageOrders: () -> Unit,
     onManageUsers: () -> Unit,
+    onMyProfile: () -> Unit,
     onLogout: () -> Unit
 ) {
     var productCount by remember { mutableStateOf<Int?>(null) }
@@ -84,6 +87,9 @@ fun AdminDashboardScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onMyProfile) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = "My Profile")
+                    }
                     IconButton(onClick = onLogout) {
                         Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
                     }
@@ -150,5 +156,5 @@ fun AdminMenuCard(title: String, subtitle: String, icon: ImageVector, onClick: (
 @Preview(showBackground = true)
 @Composable
 fun AdminDashboardPreview() {
-    Brand_ShoeTheme { AdminDashboardScreen({}, {}, {}, {}) }
+    Brand_ShoeTheme { AdminDashboardScreen({}, {}, {}, {}, {}) }
 }
