@@ -11,9 +11,7 @@ class ProductViewModelFactory(
 ) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ProductViewModel::class.java)) {
-            return ProductViewModel(repo, imageRepo) as T
-        }
+        if (modelClass.isAssignableFrom(ProductViewModel::class.java)) return ProductViewModel(repo, imageRepo) as T
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }

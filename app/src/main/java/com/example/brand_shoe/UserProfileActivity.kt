@@ -1,11 +1,18 @@
 package com.example.brand_shoe
 
 import android.content.Intent
+import androidx.compose.ui.draw.clip
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,22 +22,26 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil3.compose.AsyncImage
 import com.example.brand_shoe.Model.OrderModel
 import com.example.brand_shoe.Model.UserModel
 import com.example.brand_shoe.ViewModel.OrderViewModel
 import com.example.brand_shoe.ViewModel.OrderViewModelFactory
 import com.example.brand_shoe.ViewModel.UserViewModel
 import com.example.brand_shoe.ViewModel.UserViewModelFactory
+import com.example.brand_shoe.repo.ImageRepoImpl
 import com.example.brand_shoe.repo.OrderRepoImpl
 import com.example.brand_shoe.repo.UserRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
@@ -62,11 +73,40 @@ fun UserProfileScreen(onBackClick: () -> Unit, onLogout: () -> Unit) {
     val context = LocalContext.current
     val userViewModel: UserViewModel = viewModel(factory = UserViewModelFactory(UserRepoImpl()))
     val orderViewModel: OrderViewModel = viewModel(factory = OrderViewModelFactory(OrderRepoImpl()))
+    val imageRepo = remember { ImageRepoImpl() }
     var profile by remember { mutableStateOf<UserModel?>(null) }
     var name by remember { mutableStateOf("") }
     var isSaving by remember { mutableStateOf(false) }
+    var isUploadingPhoto by remember { mutableStateOf(false) }
     var myOrders by remember { mutableStateOf<List<OrderModel?>>(emptyList()) }
     val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+
+    val pickImageLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri: Uri? ->
+        if (uri != null) {
+            isUploadingPhoto = true
+            imageRepo.uploadImage(context, uri) { url ->
+                isUploadingPhoto = false
+                if (url != null) {
+                    val current = profile
+                    if (current != null) {
+                        val updated = current.copy(profileImageUrl = url)
+                        userViewModel.editProfile(uid, updated) { success, message ->
+                            if (success) {
+                                profile = updated
+                                Toast.makeText(context, "Profile photo updated", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    }
+                } else {
+                    Toast.makeText(context, "Photo upload failed", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         UserRepoImpl().getUserId(uid) { _, _, data ->
@@ -94,12 +134,49 @@ fun UserProfileScreen(onBackClick: () -> Unit, onLogout: () -> Unit) {
         ) {
             item {
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                    Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(88.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(88.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            }
+                    ) {
+                        if (profile?.profileImageUrl?.isNotBlank() == true) {
+                            AsyncImage(
+                                model = profile?.profileImageUrl,
+                                contentDescription = "Profile photo",
+                                modifier = Modifier.fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.AccountCircle,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        }
+                        Box(
+                            modifier = Modifier
+                                .align(Alignment.BottomEnd)
+                                .size(26.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CameraAlt,
+                                contentDescription = "Change photo",
+                                tint = Color.White,
+                                modifier = Modifier.size(14.dp)
+                            )
+                        }
+                    }
+                    if (isUploadingPhoto) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text("Uploading photo...", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(profile?.fName?.ifBlank { "Your Profile" } ?: "Your Profile", style = MaterialTheme.typography.headlineSmall)
                     Text(profile?.email ?: "", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

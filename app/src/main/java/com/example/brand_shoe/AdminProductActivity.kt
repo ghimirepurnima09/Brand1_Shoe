@@ -118,8 +118,8 @@ fun AdminProductScreen(onBackClick: () -> Unit) {
 
     if (showDialog) {
         ProductFormDialog(
-            viewModel = viewModel,
             existing = editingProduct,
+            viewModel = viewModel,
             onDismiss = { showDialog = false },
             onSave = { name, price, description, imageUrl, stock ->
                 val current = editingProduct
@@ -162,8 +162,8 @@ fun ProductAdminRow(product: ProductModel, onEdit: () -> Unit, onDelete: () -> U
 
 @Composable
 fun ProductFormDialog(
-    viewModel: ProductViewModel,
     existing: ProductModel?,
+    viewModel: ProductViewModel,
     onDismiss: () -> Unit,
     onSave: (String, Double, String, String, Int) -> Unit
 ) {
@@ -247,12 +247,12 @@ fun ProductFormDialog(
 
                     if (uriToUpload != null) {
                         isSaving = true
-                        viewModel.uploadImage(context, uriToUpload) { success, result ->
+                        viewModel.uploadImage(context, uriToUpload) { url ->
                             isSaving = false
-                            if (success) {
-                                onSave(name, finalPrice, description, result, finalStock)
+                            if (url != null) {
+                                onSave(name, finalPrice, description, url, finalStock)
                             } else {
-                                Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, "Image upload failed", Toast.LENGTH_SHORT).show()
                             }
                         }
                     } else {
