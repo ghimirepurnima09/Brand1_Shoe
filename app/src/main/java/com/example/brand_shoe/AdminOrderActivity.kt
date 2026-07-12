@@ -69,13 +69,7 @@ fun AdminOrderScreen(onBackClick: () -> Unit) {
     }
 
     val filteredOrders = remember(orders, searchQuery, selectedFilter) {
-        orders.filter { order ->
-            order != null &&
-                    (selectedFilter == "All" || order.status.equals(selectedFilter, ignoreCase = true)) &&
-                    (searchQuery.isBlank() ||
-                            order.productName.contains(searchQuery, ignoreCase = true) ||
-                            order.userName.contains(searchQuery, ignoreCase = true))
-        }
+        OrderFilterHelper.filter(orders, searchQuery, selectedFilter)
     }
 
     Scaffold(
