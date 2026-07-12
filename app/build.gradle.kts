@@ -82,3 +82,12 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
 }
+
+// Makes every test task print each test name with PASSED/FAILED/SKIPPED
+// directly in the terminal, for both unit tests and instrumented tests.
+tasks.withType<Test> {
+    testLogging {
+        events("passed", "skipped", "failed")
+        showStandardStreams = true
+    }
+}

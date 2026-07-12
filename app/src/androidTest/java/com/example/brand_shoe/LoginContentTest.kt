@@ -25,6 +25,7 @@ class LoginContentTest {
                 onForgetPasswordClick = {}
             )
         }
+        composeTestRule.waitForIdle()
 
         composeTestRule.onNodeWithText("Welcome Back").assertExists()
     }
@@ -39,9 +40,11 @@ class LoginContentTest {
                 onForgetPasswordClick = {}
             )
         }
+        composeTestRule.waitForIdle()
 
         composeTestRule.onNodeWithText("Email").performTextInput("test@mail.com")
         composeTestRule.onNodeWithText("Password").performTextInput("123456")
+        composeTestRule.waitForIdle()
 
         composeTestRule.onNodeWithText("test@mail.com").assertExists()
     }
@@ -58,8 +61,10 @@ class LoginContentTest {
                 onForgetPasswordClick = {}
             )
         }
+        composeTestRule.waitForIdle()
 
         composeTestRule.onNodeWithText("Create Account").performClick()
+        composeTestRule.waitForIdle()
 
         assert(registerClicked)
     }
