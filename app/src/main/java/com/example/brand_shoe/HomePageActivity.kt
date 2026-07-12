@@ -9,10 +9,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -36,11 +38,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.brand_shoe.Model.ProductModel
+import com.example.brand_shoe.ViewModel.NotificationViewModel
+import com.example.brand_shoe.ViewModel.NotificationViewModelFactory
 import com.example.brand_shoe.ViewModel.ProductViewModel
 import com.example.brand_shoe.ViewModel.ProductViewModelFactory
 import com.example.brand_shoe.repo.ImageRepoImpl
+import com.example.brand_shoe.repo.NotificationRepoImpl
 import com.example.brand_shoe.repo.ProductRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
+import com.google.firebase.auth.FirebaseAuth
 
 class HomePageActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -59,29 +65,56 @@ class HomePageActivity : ComponentActivity() {
                         startActivity(intent)
                     },
                     onCartClick = { startActivity(Intent(this, CartActivity::class.java)) },
-                    onProfileClick = { startActivity(Intent(this, UserProfileActivity::class.java)) }
+                    onProfileClick = { startActivity(Intent(this, UserProfileActivity::class.java)) },
+                    onNotificationsClick = { startActivity(Intent(this, NotificationActivity::class.java)) }
                 )
             }
         }
     }
 }
 
+private val sortOptions = listOf("Newest", "Price: Low to High", "Price: High to Low", "In Stock Only")
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeDashboard(onProductClick: (ProductModel) -> Unit, onCartClick: () -> Unit, onProfileClick: () -> Unit) {
+fun HomeDashboard(
+    onProductClick: (ProductModel) -> Unit,
+    onCartClick: () -> Unit,
+    onProfileClick: () -> Unit,
+    onNotificationsClick: () -> Unit
+) {
     val viewModel: ProductViewModel = viewModel(
         factory = ProductViewModelFactory(ProductRepoImpl(), ImageRepoImpl())
     )
+    val notificationViewModel: NotificationViewModel = viewModel(
+        factory = NotificationViewModelFactory(NotificationRepoImpl())
+    )
     var products by remember { mutableStateOf<List<ProductModel?>>(emptyList()) }
     var searchQuery by remember { mutableStateOf("") }
+    var selectedSort by remember { mutableStateOf("Newest") }
+    var unreadCount by remember { mutableStateOf(0) }
+    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: ""
 
     LaunchedEffect(Unit) {
         viewModel.getAllProducts { _, _, data -> products = data }
+        if (uid.isNotBlank()) {
+            notificationViewModel.getNotificationsForUser(uid) { _, _, data ->
+                unreadCount = data.count { it?.read == false }
+            }
+        }
     }
 
-    val filteredProducts = remember(products, searchQuery) {
-        if (searchQuery.isBlank()) products
+    val filteredProducts = remember(products, searchQuery, selectedSort) {
+        var result = if (searchQuery.isBlank()) products
         else products.filter { it?.name?.contains(searchQuery, ignoreCase = true) == true }
+
+        result = when (selectedSort) {
+            "Price: Low to High" -> result.sortedBy { it?.price ?: 0.0 }
+            "Price: High to Low" -> result.sortedByDescending { it?.price ?: 0.0 }
+            "In Stock Only" -> result.filter { (it?.stock ?: 0) > 0 }
+            else -> result
+        }
+        result
     }
 
     Scaffold(
@@ -100,8 +133,12 @@ fun HomeDashboard(onProductClick: (ProductModel) -> Unit, onCartClick: () -> Uni
                     }
                 },
                 actions = {
-                    IconButton(onClick = { }) {
-                        Icon(Icons.Default.Notifications, contentDescription = "Notifications")
+                    IconButton(onClick = onNotificationsClick) {
+                        BadgedBox(badge = {
+                            if (unreadCount > 0) Badge { Text("$unreadCount") }
+                        }) {
+                            Icon(Icons.Default.Notifications, contentDescription = "Notifications")
+                        }
                     }
                 }
             )
@@ -173,7 +210,20 @@ fun HomeDashboard(onProductClick: (ProductModel) -> Unit, onCartClick: () -> Uni
                 )
             )
 
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                sortOptions.forEach { option ->
+                    FilterChip(
+                        selected = selectedSort == option,
+                        onClick = { selectedSort = if (selectedSort == option) "Newest" else option },
+                        label = { Text(option) },
+                        modifier = Modifier.padding(end = 8.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -238,5 +288,5 @@ fun ProductGridItem(product: ProductModel, onClick: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun HomeDashboardPreview() {
-    Brand_ShoeTheme { HomeDashboard(onProductClick = {}, onCartClick = {}, onProfileClick = {}) }
+    Brand_ShoeTheme { HomeDashboard(onProductClick = {}, onCartClick = {}, onProfileClick = {}, onNotificationsClick = {}) }
 }

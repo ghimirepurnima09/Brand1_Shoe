@@ -27,9 +27,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.brand_shoe.Model.NotificationModel
 import com.example.brand_shoe.Model.OrderModel
+import com.example.brand_shoe.ViewModel.NotificationViewModel
+import com.example.brand_shoe.ViewModel.NotificationViewModelFactory
 import com.example.brand_shoe.ViewModel.OrderViewModel
 import com.example.brand_shoe.ViewModel.OrderViewModelFactory
+import com.example.brand_shoe.repo.NotificationRepoImpl
 import com.example.brand_shoe.repo.OrderRepoImpl
 import com.example.brand_shoe.ui.theme.Brand_ShoeTheme
 import java.text.SimpleDateFormat
@@ -54,6 +58,7 @@ private val filterOptions = listOf("All") + orderStatuses
 fun AdminOrderScreen(onBackClick: () -> Unit) {
     val context = LocalContext.current
     val viewModel: OrderViewModel = viewModel(factory = OrderViewModelFactory(OrderRepoImpl()))
+    val notificationViewModel: NotificationViewModel = viewModel(factory = NotificationViewModelFactory(NotificationRepoImpl()))
     var orders by remember { mutableStateOf<List<OrderModel?>>(emptyList()) }
     var searchQuery by remember { mutableStateOf("") }
     var selectedFilter by remember { mutableStateOf("All") }
@@ -134,6 +139,13 @@ fun AdminOrderScreen(onBackClick: () -> Unit) {
                                 onStatusChange = { newStatus ->
                                     viewModel.updateOrderStatus(it.id, newStatus) { _, message ->
                                         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                        notificationViewModel.addNotification(
+                                            NotificationModel(
+                                                userId = it.userId,
+                                                title = "Order status updated",
+                                                message = "Your order for ${it.productName} is now $newStatus"
+                                            )
+                                        ) { _, _ -> }
                                     }
                                 },
                                 onDetailsClick = { selectedOrder = it }
