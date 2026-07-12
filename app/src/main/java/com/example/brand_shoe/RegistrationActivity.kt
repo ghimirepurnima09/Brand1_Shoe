@@ -173,39 +173,31 @@ fun RegistrationContent(
                         Spacer(modifier = Modifier.height(20.dp))
                         Button(
                             onClick = {
-                                when {
-                                    name.isBlank() || email.isBlank() || password.isBlank() -> {
-                                        Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                                    }
-                                    password != confirmPassword -> {
-                                        Toast.makeText(context, "Passwords do not match", Toast.LENGTH_SHORT).show()
-                                    }
-                                    password.length < 6 -> {
-                                        Toast.makeText(context, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show()
-                                    }
-                                    else -> {
-                                        isLoading = true
-                                        viewModel.register(email.trim(), password) { success, message, uid ->
-                                            if (success) {
-                                                val profile = UserModel(
-                                                    id = uid,
-                                                    fName = name.trim(),
-                                                    email = email.trim(),
-                                                    role = "customer"
-                                                )
-                                                viewModel.addUser(uid, profile) { savedOk, savedMsg ->
-                                                    isLoading = false
-                                                    if (savedOk) {
-                                                        Toast.makeText(context, "account create successfully", Toast.LENGTH_LONG).show()
-                                                        onRegisterSuccess()
-                                                    } else {
-                                                        Toast.makeText(context, savedMsg, Toast.LENGTH_SHORT).show()
-                                                    }
-                                                }
-                                            } else {
+                                val error = RegistrationValidator.validate(name, email, password, confirmPassword)
+                                if (error != null) {
+                                    Toast.makeText(context, error, Toast.LENGTH_SHORT).show()
+                                } else {
+                                    isLoading = true
+                                    viewModel.register(email.trim(), password) { success, message, uid ->
+                                        if (success) {
+                                            val profile = UserModel(
+                                                id = uid,
+                                                fName = name.trim(),
+                                                email = email.trim(),
+                                                role = "customer"
+                                            )
+                                            viewModel.addUser(uid, profile) { savedOk, savedMsg ->
                                                 isLoading = false
-                                                Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                                                if (savedOk) {
+                                                    Toast.makeText(context, "account create successfully", Toast.LENGTH_LONG).show()
+                                                    onRegisterSuccess()
+                                                } else {
+                                                    Toast.makeText(context, savedMsg, Toast.LENGTH_SHORT).show()
+                                                }
                                             }
+                                        } else {
+                                            isLoading = false
+                                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                                         }
                                     }
                                 }

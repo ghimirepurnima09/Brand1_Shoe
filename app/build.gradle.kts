@@ -36,12 +36,7 @@ android {
 }
 
 dependencies {
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.6.4")
-    debugImplementation("androidx.compose.ui:ui-test-manifest:1.6.4")
-    implementation("androidx.compose.material:material-icons-core")
-    implementation("androidx.compose.material:material-icons-extended")
+    // --- Core / Compose (all via version catalog, BOM controls versions) ---
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -52,30 +47,38 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.database)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.11.0")
+    implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
+
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.11.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.11.0")
     implementation("androidx.compose.runtime:runtime-livedata:1.7.0")
 
-    // Firebase (Auth + Realtime Database only — Storage no longer used)
+    // Firebase
     implementation(platform("com.google.firebase:firebase-bom:34.15.0"))
 
-    // Coroutines Play Services (Required for .await() on Firebase tasks)
+    // Coroutines Play Services
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
 
     // Image Loading
     implementation("io.coil-kt.coil3:coil-compose:3.5.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.5.0")
 
-    // Cloudinary SDK for image upload
+    // Cloudinary SDK
     implementation("com.cloudinary:cloudinary-android:3.0.2")
 
+    // --- Debug tooling ---
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
+
+    // --- Unit testing (JVM only, src/test) ---
     testImplementation(libs.junit)
+
+    // --- Instrumented testing (device/emulator, src/androidTest) ---
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

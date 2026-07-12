@@ -89,7 +89,6 @@ fun LoginContent(
     val userProfile by viewModel.users.observeAsState()
     val isViewModelLoading by viewModel.loading.observeAsState(false)
 
-    // Fires whenever the fetched profile changes or loading finishes
     LaunchedEffect(userProfile, isViewModelLoading) {
         if (waitingForRole && !isViewModelLoading) {
             if (userProfile != null) {
@@ -97,14 +96,12 @@ fun LoginContent(
                 isLoading = false
                 isAdminLoading = false
 
-                // Role check (case-insensitive for better reliability)
                 if (userProfile?.role?.lowercase() == "admin") {
                     onNavigateAdmin()
                 } else {
                     onNavigateHome()
                 }
             } else {
-                // If loading finished but userProfile is still null, it means the fetch failed
                 waitingForRole = false
                 isLoading = false
                 isAdminLoading = false
